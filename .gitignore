@@ -53,6 +53,10 @@ Thumbs.db
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
+# Xcode User State
+xcuserdata/
+*.xcuserstate
+
 ## Build generated
 build/
 DerivedData/
