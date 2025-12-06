@@ -14,7 +14,7 @@ protocol ForecastApiServiceProtocol {
     func fetchForecast() async throws -> ForecastResponse
     
     /// A request to fetch data based on location changes or search for city
-    func fetchForecast(for location: String) -> AnyPublisher<ForecastResponse, Error>
+    func fetchForecast(for location: String) async throws -> ForecastResponse
     
     /// A Combine publisher that emits hourly updates (e.g. when a new forecast is fetched)
     var hourlyPublisher: AnyPublisher<[HourlyPoint], Never> { get }
@@ -65,9 +65,29 @@ final class ForecastApiService: ForecastApiServiceProtocol {
     }
     
     // TODO: - update the api for location changes
-    func fetchForecast(for location: String) -> AnyPublisher<ForecastResponse, Error> {
-        Empty<ForecastResponse, Error>()
-            .eraseToAnyPublisher()
+    func fetchForecast(for location: String) async throws -> ForecastResponse {
+        guard let url = URL(string: urlString) else {
+            fatalError("Invalid URL")
+        }
+        
+        let (data, response) = try await URLSession.shared.data(from: url)
+        if let response = response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
+            throw URLError(.badServerResponse)
+        }
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        let forecastResponse = try decoder.decode(ForecastResponse.self, from: data)
+        
+        if let hourly = forecastResponse.hourly?.hourlyPoints {
+            hourlySubject.send(hourly)
+        }
+        
+        if let daily = forecastResponse.daily?.toDailyPoints() {
+            dailySubject.send(daily)
+        }
+        
+        return forecastResponse
     }
     
     func startPolling(every seconds: TimeInterval) -> AnyCancellable {
