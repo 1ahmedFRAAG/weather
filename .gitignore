@@ -48,10 +48,14 @@ Thumbs.db
 *.mov
 *.wmv
 
-=======
+
 # Xcode
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+
+# Xcode user state
+*.xcuserstate
+*.xcuserdata/
 
 ## Build generated
 build/
