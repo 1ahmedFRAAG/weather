@@ -11,7 +11,7 @@ import SwiftUI
 
 class WeatherStore: ObservableObject {
     struct State {
-        var currentweather: ForecastResponse?
+        var currentweather: WeatherResponse?
         var hoursPoints: [HourlyPoint]?
         var dailyPoints: [DailyPoint]?
         var isLoading: Bool = false
@@ -22,7 +22,7 @@ class WeatherStore: ObservableObject {
     
     // intents
     enum Intent {
-        case fetchcurrentweather
+        case fetchcurrentWeather
         case fetchWetherinLocation(city: String)
         
         case startPolling(interval: TimeInterval)
@@ -53,7 +53,7 @@ class WeatherStore: ObservableObject {
     
     func send(_ intent: Intent) {
             switch intent {
-            case .fetchcurrentweather:
+            case .fetchcurrentWeather:
                 Task { await performRefresh() }
             case .startPolling(let interval):
                 pollingCancellable = api.startPolling(every: interval)
@@ -71,7 +71,7 @@ class WeatherStore: ObservableObject {
         state.isLoading = true
         state.error = nil
            do {
-               let resp = try await api.fetchForecast()
+               let resp = try await api.fetchWeather()
                // optionally map current temp
                state.currentweather = resp
                
@@ -86,7 +86,7 @@ class WeatherStore: ObservableObject {
         state.isLoading = true
         state.error = nil
            do {
-               let resp = try await api.fetchForecast(for: city)
+               let resp = try await api.fetchWeather(for: city)
                // optionally map current temp
                state.currentweather = resp
                
