@@ -16,6 +16,7 @@ class WeatherStore: ObservableObject {
         var dailyPoints: [DailyPoint]?
         var isLoading: Bool = false
         var error: Error?
+        var lastError: String?
     }
     
     @Published private(set) var state: State = State()
