@@ -11,10 +11,10 @@ import Combine
 
 protocol ForecastApiServiceProtocol {
     // performe
-    func fetchForecast() async throws -> ForecastResponse
+    func fetchWeather() async throws -> WeatherResponse
     
     /// A request to fetch data based on location changes or search for city
-    func fetchForecast(for location: String) async throws -> ForecastResponse
+    func fetchWeather(for location: String) async throws -> WeatherResponse
     
     /// A Combine publisher that emits hourly updates (e.g. when a new forecast is fetched)
     var hourlyPublisher: AnyPublisher<[HourlyPoint], Never> { get }
@@ -38,7 +38,7 @@ final class ForecastApiService: ForecastApiServiceProtocol {
     var dailyPublisher: AnyPublisher<[DailyPoint], Never> { dailySubject.eraseToAnyPublisher() }
     
     
-    func fetchForecast() async throws -> ForecastResponse {
+    func fetchWeather() async throws -> WeatherResponse {
         
         guard let url = URL(string: urlString) else {
             fatalError("Invalid URL")
@@ -51,7 +51,7 @@ final class ForecastApiService: ForecastApiServiceProtocol {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         
-        let forecastResponse = try decoder.decode(ForecastResponse.self, from: data)
+        let forecastResponse = try decoder.decode(WeatherResponse.self, from: data)
         
         if let hourly = forecastResponse.hourly?.hourlyPoints {
             hourlySubject.send(hourly)
@@ -65,7 +65,7 @@ final class ForecastApiService: ForecastApiServiceProtocol {
     }
     
     // TODO: - update the api for location changes
-    func fetchForecast(for location: String) async throws -> ForecastResponse {
+    func fetchWeather(for location: String) async throws -> WeatherResponse {
         guard let url = URL(string: urlString) else {
             fatalError("Invalid URL")
         }
@@ -77,7 +77,7 @@ final class ForecastApiService: ForecastApiServiceProtocol {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         
-        let forecastResponse = try decoder.decode(ForecastResponse.self, from: data)
+        let forecastResponse = try decoder.decode(WeatherResponse.self, from: data)
         
         if let hourly = forecastResponse.hourly?.hourlyPoints {
             hourlySubject.send(hourly)
@@ -94,14 +94,14 @@ final class ForecastApiService: ForecastApiServiceProtocol {
         pollingCancellable?.cancel()
         let publisher = Timer.publish(every: seconds, on: .main, in: .common).autoconnect()
             .flatMap { _ in
-                Future<ForecastResponse, Never> { promise in
+                Future<WeatherResponse, Never> { promise in
                     Task {
                         do {
-                            let resp = try await self.fetchForecast()
+                            let resp = try await self.fetchWeather()
                             promise(.success(resp))
                         } catch {
                             // swallow errors for polling demo; in real app report them
-                            promise(.success(ForecastResponse(latitude: 0, longitude: 0, timezone: "", current: nil, hourly: nil, daily: nil)))
+                            promise(.success(WeatherResponse(latitude: 0, longitude: 0, timezone: "", current: nil, hourly: nil, daily: nil)))
                         }
                     }
                 }

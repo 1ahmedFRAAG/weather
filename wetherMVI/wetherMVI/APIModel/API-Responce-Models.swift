@@ -2,7 +2,7 @@
 import Foundation
 
 // MARK: - Top-level response
-struct ForecastResponse: Codable {
+struct WeatherResponse: Codable {
     let latitude: Double
     let longitude: Double
     let timezone: String

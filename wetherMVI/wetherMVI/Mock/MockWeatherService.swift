@@ -44,11 +44,11 @@ extension MockWeatherService: ForecastApiServiceProtocol {
         dailySubject.eraseToAnyPublisher()
     }
     
-    func fetchForecast() async throws -> ForecastResponse {
+    func fetchWeather() async throws -> WeatherResponse {
         let simpleDate = Date()
         let isnow = ISO8601DateFormatter().string(from: simpleDate)
         
-        let forcast = ForecastResponse(
+        let forcast = WeatherResponse(
             latitude: 30.1,
             longitude: 30.1,
             timezone: "Africa/Cairo",
@@ -82,11 +82,11 @@ extension MockWeatherService: ForecastApiServiceProtocol {
         return forcast
     }
     
-    func fetchForecast(for location: String) async throws -> ForecastResponse {
+    func fetchWeather(for location: String) async throws -> WeatherResponse {
         let simpleDate = Date()
         let isnow = ISO8601DateFormatter().string(from: simpleDate)
         
-        let forcast = ForecastResponse(
+        let forcast = WeatherResponse(
             latitude: 30.1,
             longitude: 30.1,
             timezone: "Africa/Cairo",
@@ -124,7 +124,7 @@ extension MockWeatherService: ForecastApiServiceProtocol {
             .autoconnect()
             .sink { _ in
                 Task {
-                    _ = try await self.fetchForecast()
+                    _ = try await self.fetchWeather()
                 }
             }
     }
